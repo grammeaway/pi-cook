@@ -1,0 +1,25 @@
+{
+  "name": "@grammeaway/pi-cook",
+  "version": "1.0.0",
+  "description": "Cook mode for the Pi agentic harness: /cook keeps your screen awake, always or only while the agent works",
+  "type": "module",
+  "keywords": ["pi", "pi-extension", "cook-mode", "caffeinate", "systemd-inhibit", "keep-awake", "pi-package"],
+  "license": "MIT",
+  "author": "Victor Gram Thomsen <victor@guramusoftware.com>",
+  "repository": { "type": "git", "url": "git+https://github.com/grammeaway/pi-cook" },
+  "bugs": { "url": "https://github.com/grammeaway/pi-cook/issues" },
+  "homepage": "https://github.com/grammeaway/pi-cook#readme",
+  "files": ["index.ts", "README.md", "LICENSE"],
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "scripts": {
+    "test": "node --test test/*.test.ts"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": ">=0.79.0"
+  },
+  "devDependencies": {
+    "fast-check": "^4.3.0"
+  }
+}
