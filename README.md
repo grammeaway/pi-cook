@@ -34,7 +34,9 @@ The footer shows `♨ cook` or `♨ cook (agent)` while active.
 ## Notes
 
 - **Per session.** The mode is stored in the session file, so resuming a
-  session restores it, and other Pi sessions are unaffected. `/new` starts off.
+  session restores it, and other Pi sessions are unaffected. A session started
+  with `/new` or `/fork` (or by an extension) keeps the mode of the one it
+  replaced.
 - **Linux:** `systemd-inhibit --what=idle`. Respected by GNOME, KDE, and
   hypridle (default `ignore_systemd_inhibit = false`).
 - **macOS:** `caffeinate -d -i`.

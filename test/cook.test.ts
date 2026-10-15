@@ -125,7 +125,10 @@ test("real systemd-inhibit lock is taken and released", { skip: !hasSystemd && "
   const ctx = { ui: { setStatus() {}, notify() {} }, sessionManager: { getBranch: () => [] } };
   createCookMode()(pi);
   handlers.session_start({}, ctx);
-  const held = () => listInhibitors().stdout.includes("cook mode");
+  // Other Pi sessions on this machine may hold their own cook lock; count against a baseline.
+  const count = () => listInhibitors().stdout.split("\n").filter((l) => l.includes("cook mode")).length;
+  const baseline = count();
+  const held = () => count() > baseline;
   const waitFor = async (want: boolean) => {
     for (let i = 0; i < 50 && held() !== want; i++) await new Promise((r) => setTimeout(r, 100));
     return held();
@@ -138,4 +141,30 @@ test("real systemd-inhibit lock is taken and released", { skip: !hasSystemd && "
   } finally {
     handlers.session_shutdown({}, ctx);
   }
+});
+
+test("a new or forked session continues the mode of the one it replaced; resume keeps its own", async () => {
+  const old = harness();
+  old.emit("session_start", { reason: "startup" });
+  await old.cook("agent");
+  old.emit("session_shutdown");
+
+  for (const reason of ["new", "fork"]) {
+    const next = harness();
+    next.emit("session_start", { reason });
+    assert.equal(next.status, "♨ cook (agent)", reason);
+    assert.deepEqual(next.entries.at(-1)?.data, { mode: "agent" }, `${reason} persists the carried mode`);
+  }
+
+  const resumed = harness();
+  resumed.emit("session_start", { reason: "resume" });
+  assert.equal(resumed.status, "");
+
+  const off = harness();
+  off.emit("session_start", { reason: "startup" });
+  off.emit("session_shutdown");
+  const after = harness();
+  after.emit("session_start", { reason: "new" });
+  assert.equal(after.status, "");
+  assert.equal(after.entries.length, 0, "carrying off writes nothing");
 });

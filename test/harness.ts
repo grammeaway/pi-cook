@@ -61,7 +61,7 @@ export function harness(opts: { platform?: string; spawn?: (cmd: string, args: s
       return status;
     },
     live: () => children.filter((c) => c.alive),
-    emit: (event: string) => handlers[event]?.({ type: event }, ctx),
+    emit: (event: string, extra: object = {}) => handlers[event]?.({ type: event, ...extra }, ctx),
     cook: (args = "") => commands.cook.handler(args, ctx),
   };
 }

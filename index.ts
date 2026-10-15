@@ -7,7 +7,8 @@
  *   /cook off
  *
  * Mode is per session: persisted as a session entry, so resuming restores it,
- * and other sessions aren't affected. Extension commands run immediately, even
+ * and other sessions aren't affected. A new or forked session (/new, /fork, or an
+ * extension starting one) continues the mode of the session it replaced. Extension commands run immediately, even
  * mid-stream, so /cook never interrupts the agent.
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
@@ -114,11 +115,13 @@ export function createCookMode(overrides: Partial<Deps> = {}) {
       },
     });
 
-    pi.on("session_start", (_e, ctx) => {
+    pi.on("session_start", (e, ctx) => {
       stop();
       busy = false;
       mode = restoreMode(ctx.sessionManager.getBranch());
-      sync(ctx);
+      const carried = (globalThis as any).__piCookCarry;
+      if ((e.reason === "new" || e.reason === "fork") && MODES.includes(carried)) setMode(carried, ctx);
+      else sync(ctx);
     });
     pi.on("agent_start", (_e, ctx) => {
       busy = true;
@@ -129,6 +132,8 @@ export function createCookMode(overrides: Partial<Deps> = {}) {
       sync(ctx);
     });
     pi.on("session_shutdown", () => {
+      // Each session loads its own copy of this extension; the next one picks this up in session_start.
+      (globalThis as any).__piCookCarry = mode;
       busy = false;
       stop();
     });
