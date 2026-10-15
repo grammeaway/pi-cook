@@ -1,6 +1,6 @@
 {
   "name": "@grammeaway/pi-cook",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Cook mode for the Pi agentic harness: /cook keeps your screen awake, always or only while the agent works",
   "type": "module",
   "keywords": ["pi", "pi-extension", "cook-mode", "caffeinate", "systemd-inhibit", "keep-awake", "pi-package"],
